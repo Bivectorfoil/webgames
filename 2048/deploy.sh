@@ -58,7 +58,7 @@ Requirements:
     - Sudo privileges
     - Internet connection
 
-For more information, visit: https://github.com/yourusername/2048-game
+For more information, visit: https://github.com/Bivectorfoil/webgames
 EOF
     exit 0
 }
@@ -139,14 +139,11 @@ print_message "Setting up application directory..."
 sudo mkdir -p "$APP_DIR" || print_error "Failed to create application directory"
 sudo chown "$APP_USER:$APP_USER" "$APP_DIR" || print_error "Failed to set directory ownership"
 
-# Clone or update repository
-print_message "Deploying application code..."
-if [ -d "$APP_DIR/.git" ]; then
-    cd "$APP_DIR" || print_error "Failed to change to $APP_DIR"
-    sudo -u "$APP_USER" git pull || print_error "Failed to pull latest changes"
-else
-    sudo -u "$APP_USER" git clone https://github.com/gabrielecirulli/2048.git "$APP_DIR" || print_error "Failed to clone repository"
-fi
+# Copy application files
+print_message "Copying application files..."
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+sudo cp -r "$SCRIPT_DIR"/* "$APP_DIR/" || print_error "Failed to copy application files"
+sudo chown -R "$APP_USER:$APP_USER" "$APP_DIR" || print_error "Failed to set files ownership"
 
 # Install dependencies
 print_message "Installing dependencies..."
