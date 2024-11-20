@@ -5,9 +5,9 @@ A web-based implementation of the 2048 game with an AI auto-play feature.
 ## Deployment Instructions
 
 ### Prerequisites
-- Node.js (v14 or higher)
-- npm (Node Package Manager)
-- A VPS with SSH access
+- A Linux-based VPS with SSH access
+- Basic understanding of terminal commands
+- Sudo privileges on the server
 
 ### Local Setup
 1. Clone the repository
@@ -21,152 +21,82 @@ A web-based implementation of the 2048 game with an AI auto-play feature.
    ```
 4. Visit `http://localhost:3000` in your browser
 
-### VPS Deployment Steps
+### VPS Deployment
+
+The game comes with an automated deployment script that handles everything for you, including:
+- Creating a dedicated user for the application
+- Installing all required dependencies
+- Setting up Nginx as the web server
+- Configuring proper permissions and security settings
+
+#### Quick Deployment
 
 1. Connect to your VPS via SSH:
    ```bash
    ssh username@your-vps-ip
    ```
 
-2. Install Node.js and npm (if not already installed):
+2. Copy the deployment files to your server:
    ```bash
-   curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-   sudo apt-get install -y nodejs
+   # From your local machine
+   scp -r deploy.sh username@your-vps-ip:~/
    ```
 
-3. Create a directory for the game and navigate to it:
+3. Run the deployment script:
    ```bash
-   mkdir 2048-game
-   cd 2048-game
+   # Without a domain
+   sudo ./deploy.sh
+
+   # With a domain
+   sudo ./deploy.sh yourdomain.com
    ```
 
-4. Upload the game files to your VPS:
-   - Using SCP from your local machine:
-     ```bash
-     scp -r * username@your-vps-ip:/path/to/2048-game/
-     ```
-   - Or using Git if you have a repository:
-     ```bash
-     git clone your-repository-url
-     ```
+The script will:
+- Create a dedicated `webgames` user for running the application
+- Install Node.js and other required dependencies
+- Set up Nginx as the web server
+- Configure the firewall (UFW)
+- Deploy the application securely
 
-5. Install dependencies:
+#### Post-Deployment
+
+After successful deployment:
+1. Your game will be accessible at:
+   - `http://your-server-ip` (if no domain was provided)
+   - `http://yourdomain.com` (if a domain was provided)
+
+2. The application files will be located at `/var/www/2048-game`
+
+3. The web server configuration will be at `/etc/nginx/sites-available/2048-game`
+
+### Security Notes
+
+- The application runs under a dedicated non-root user for improved security
+- Only necessary system ports (80, 443, and SSH) are opened in the firewall
+- All system-level operations use sudo with minimal required permissions
+- Application files are owned by the dedicated user
+
+### Troubleshooting
+
+If you encounter any issues:
+1. Check the Nginx error logs:
    ```bash
-   npm install
+   sudo tail -f /var/nginx/error.log
    ```
 
-6. Install PM2 (process manager) to keep the server running:
+2. Verify the Nginx configuration:
    ```bash
-   sudo npm install -g pm2
-   ```
-
-7. Start the server with PM2:
-   ```bash
-   pm2 start server.js --name "2048-game"
-   ```
-
-8. (Optional) Configure PM2 to start on system boot:
-   ```bash
-   pm2 startup
-   pm2 save
-   ```
-
-9. Configure your firewall to allow traffic on port 3000:
-   ```bash
-   sudo ufw allow 3000
-   ```
-
-Your game should now be accessible at `http://your-vps-ip:3000`
-
-### Quick Deployment
-
-A deployment script (`deploy.sh`) is provided for easy deployment to Ubuntu 22.04 VPS servers. The script automates all the necessary setup steps including Node.js installation, Nginx configuration, and SSL setup.
-
-### Using the Deployment Script
-
-1. Make the script executable:
-   ```bash
-   chmod +x deploy.sh
-   ```
-
-2. Upload your project files to your VPS:
-   ```bash
-   scp -r * username@your-vps-ip:~/2048-game/
-   ```
-
-3. SSH into your VPS:
-   ```bash
-   ssh username@your-vps-ip
-   ```
-
-4. Run the deployment script:
-   - With a domain:
-     ```bash
-     cd 2048-game
-     sudo ./deploy.sh your-domain.com
-     ```
-   - Without a domain:
-     ```bash
-     cd 2048-game
-     sudo ./deploy.sh
-     ```
-
-The script will automatically:
-- Update system packages
-- Install Node.js 18 and required dependencies
-- Set up PM2 for process management
-- Configure Nginx as a reverse proxy
-- Set up UFW firewall rules
-- Install SSL certificate (if domain provided)
-- Start your application
-
-After deployment, your game will be:
-- Available on HTTP (port 80) and HTTPS (port 443, if domain provided)
-- Managed by PM2 with auto-restart capability
-- Protected by UFW firewall
-- Served through Nginx reverse proxy
-- Configured to start automatically on system reboot
-
-### Optional: Setting up with Nginx (Recommended)
-
-1. Install Nginx:
-   ```bash
-   sudo apt-get install nginx
-   ```
-
-2. Create an Nginx configuration file:
-   ```bash
-   sudo nano /etc/nginx/sites-available/2048-game
-   ```
-
-3. Add the following configuration:
-   ```nginx
-   server {
-       listen 80;
-       server_name your-domain.com;
-
-       location / {
-           proxy_pass http://localhost:3000;
-           proxy_http_version 1.1;
-           proxy_set_header Upgrade $http_upgrade;
-           proxy_set_header Connection 'upgrade';
-           proxy_set_header Host $host;
-           proxy_cache_bypass $http_upgrade;
-       }
-   }
-   ```
-
-4. Enable the site:
-   ```bash
-   sudo ln -s /etc/nginx/sites-available/2048-game /etc/nginx/sites-enabled/
    sudo nginx -t
-   sudo systemctl restart nginx
    ```
 
-5. (Optional) Set up SSL with Let's Encrypt:
+3. Check the application file permissions:
    ```bash
-   sudo apt-get install certbot python3-certbot-nginx
-   sudo certbot --nginx -d your-domain.com
+   ls -la /var/www/2048-game
    ```
 
-Your game will now be accessible at `http://your-domain.com` (or `https://` if you set up SSL).
+### Need Help?
+
+If you encounter any problems during deployment, please:
+1. Check the error messages in the terminal
+2. Review the troubleshooting steps above
+3. Open an issue in the repository with details about the problem
