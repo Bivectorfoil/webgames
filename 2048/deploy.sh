@@ -151,18 +151,10 @@ sudo apt-get install -y nginx || print_error "Failed to install Nginx"
 
 # Create Nginx configuration
 print_message "Creating Nginx configuration..."
-sudo tee "/etc/nginx/sites-available/$APP_NAME" > /dev/null << EOF || print_error "Failed to create Nginx configuration"
-server {
-    listen 80;
-    server_name ${DOMAIN:-_};
-    root $APP_DIR;
-    index index.html;
-
-    location / {
-        try_files \$uri \$uri/ =404;
-    }
-}
-EOF
+# Replace variables in nginx.conf template
+sed "s/\$DOMAIN/${DOMAIN:-_}/g; s|\$ROOT_DIR|$APP_DIR|g" "$SCRIPT_DIR/nginx.conf" | \
+    sudo tee "/etc/nginx/sites-available/$APP_NAME" > /dev/null || \
+    print_error "Failed to create Nginx configuration"
 
 # Enable the site
 sudo ln -sf "/etc/nginx/sites-available/$APP_NAME" "/etc/nginx/sites-enabled/" || print_error "Failed to enable Nginx site"
