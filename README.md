@@ -5,4 +5,5 @@ A collection of web games
 
 [Windsurf](https://codeium.com/windsurf)
 
+### Games
 [2048](/2048)

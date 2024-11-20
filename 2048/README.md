@@ -2,6 +2,10 @@
 
 A web-based implementation of the 2048 game with an AI auto-play feature.
 
+## Local Development
+
+Simply open `index.html` in your browser, or use VS Code's Live Server extension for auto-reload functionality.
+
 ## Deployment Instructions
 
 ### Prerequisites

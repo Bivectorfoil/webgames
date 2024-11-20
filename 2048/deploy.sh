@@ -145,11 +145,6 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 sudo cp -r "$SCRIPT_DIR"/* "$APP_DIR/" || print_error "Failed to copy application files"
 sudo chown -R "$APP_USER:$APP_USER" "$APP_DIR" || print_error "Failed to set files ownership"
 
-# Install dependencies
-print_message "Installing dependencies..."
-cd "$APP_DIR" || print_error "Failed to change to $APP_DIR"
-sudo -u "$APP_USER" npm install || print_error "Failed to install dependencies"
-
 # Set up Nginx
 print_message "Setting up Nginx..."
 sudo apt-get install -y nginx || print_error "Failed to install Nginx"
