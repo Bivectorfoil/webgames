@@ -7,3 +7,5 @@ A collection of web games
 
 ### Games
 [2048](/2048)
+
+[Snake](/snake)
