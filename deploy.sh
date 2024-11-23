@@ -124,6 +124,26 @@ BASE_DIR="/var/www/webgames"
 NGINX_BASE="/etc/nginx/sites-available"
 GAMES_CONF="shared/games.conf"
 
+# Deploy homepage
+print_message "Deploying homepage..."
+mkdir -p "$BASE_DIR/homepage"
+cp -r homePage/* "$BASE_DIR/homepage/"
+
+# Replace domain placeholder in homepage
+print_message "Updating homepage links..."
+sed -i "s/\$DOMAIN/$DOMAIN/g" "$BASE_DIR/homepage/index.html"
+
+# Configure main domain for homepage
+print_message "Configuring nginx for main domain..."
+sed "s/\$DOMAIN/$DOMAIN/g; s|\$ROOT_DIR|$BASE_DIR/homepage|g" shared/nginx.template.conf > "$NGINX_BASE/homepage"
+ln -sf "$NGINX_BASE/homepage" /etc/nginx/sites-enabled/
+
+# Configure games subdomain
+print_message "Configuring nginx for games subdomain..."
+GAMES_DOMAIN="games.$DOMAIN"
+sed "s/\$DOMAIN/$GAMES_DOMAIN/g; s|\$ROOT_DIR|$BASE_DIR/homepage|g" shared/nginx.template.conf > "$NGINX_BASE/games"
+ln -sf "$NGINX_BASE/games" /etc/nginx/sites-enabled/
+
 # Update system and install requirements
 print_message "Updating system packages..."
 apt-get update
