@@ -88,6 +88,24 @@ print_warning() {
     echo -e "${YELLOW}[WARNING] $1${NC}"
 }
 
+# Function to check if a command exists
+check_command() {
+    if ! command -v "$1" &> /dev/null; then
+        print_error "$1 is not installed. Please install $1 and try again."
+    fi
+}
+
+# Function to install Node.js and npm
+install_node() {
+    print_message "Installing Node.js and npm..."
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
+    apt-get install -y nodejs
+    
+    # Verify installation
+    check_command "node"
+    check_command "npm"
+}
+
 # Parse command line arguments
 case "$1" in
     -h|--help)
@@ -130,10 +148,20 @@ deploy_game() {
     # Run build command if it exists
     if [ ! -z "$BUILD_CMD" ]; then
         print_message "Building $GAME_NAME..."
-        cd "$GAME_DIR"
-        npm install
-        eval "$BUILD_CMD"
-        cd - > /dev/null
+        # Check if package.json exists
+        if [ -f "$GAME_DIR/package.json" ]; then
+            # Check for Node.js and npm
+            if ! command -v node &> /dev/null || ! command -v npm &> /dev/null; then
+                print_message "Node.js and npm are required but not found. Installing..."
+                install_node
+            fi
+            cd "$GAME_DIR"
+            npm install
+            eval "$BUILD_CMD"
+            cd - > /dev/null
+        else
+            eval "$BUILD_CMD"
+        fi
     fi
     
     # Create nginx configuration
